@@ -33,7 +33,7 @@ This dataset is designed for training and evaluating cloud removal models on coa
 ### Cloud Coverage Distribution
 ![Cloud Coverage Distribution](https://github.com/jingfeng301/CoastalRemoteSensingImagery/blob/main/CloudCoverageDistribution.png)
 
-*Figure: Distribution comparison of 2.1 million cloud masks from the AllClear data source and 975 thousand coastline-focused cloud masks.*
+*Figure: Distribution comparison of 2.1 million cloud masks from the AllClear data source (blue) and 975 thousand coastline-focused cloud masks (red).*
 
 The graph above compares the cloud coverage distribution between the AllClear ROIs and the filtered ROIs, showing that coastline ROIs generally have higher cloud coverage.
 
