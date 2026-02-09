@@ -1,0 +1,15 @@
+pandas
+
+geopandas
+shapely
+fiona
+pyproj
+rtree
+matplotlib
+rasterio
+tqdm
+torch 
+torchvision
+numpy
+seaborn
+natsort
