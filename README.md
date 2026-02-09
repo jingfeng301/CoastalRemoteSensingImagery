@@ -2,9 +2,13 @@
 
 A large-scale dataset for cloud removal in coastal Sentinel-2 imagery, containing 10,223 regions of interest (ROIs) derived from the AllClear dataset with specialized coastal filtering.
 
-## 📋 Overview
+## Overview
 
 This dataset is designed for training and evaluating cloud removal models on coastal remote sensing imagery. Built upon the [AllClear dataset](https://github.com/Zhou-Hangyu/allclear), it applies custom filtering criteria to focus specifically on coastal regions.
+
+![Coastline ROIs Distribution](https://github.com/jingfeng301/CoastalRemoteSensingImagery/blob/main/CoastlineFilter.png)
+
+*Figure: Global distribution of 10,223 coastal ROIs (green) and excluded inland ROIs (red) from the AllClear dataset.*
 
 ### Dataset Construction Pipeline
 
@@ -26,13 +30,14 @@ This dataset is designed for training and evaluating cloud removal models on coa
 - **Global coastal coverage** - Focused on coastal regions within 300km of coastlines
 - **Quality-controlled** - All images validated for readability and data integrity (NaN < 10%)
 
-### Geographic Distribution
+### Cloud Coverage Distribution
+![Cloud Coverage Distribution](https://github.com/jingfeng301/CoastalRemoteSensingImagery/blob/main/CloudCoverageDistribution.png)
 
-The map below shows the global distribution of coastal ROIs (green) within 300km of coastlines. Red markers indicate ROIs from AllClear that were excluded for being beyond the 300km coastal threshold.
+*Figure: Distribution comparison of 2.1 million cloud masks from the AllClear data source and 975 thousand coastline-focused cloud masks.*
 
-![Coastline ROIs Distribution](/home/wangyu/CoastalRemoteSensingImagery/CoastlineFilter.png)
+The graph above compares the cloud coverage distribution between the AllClear ROIs and the filtered ROIs, showing that coastline ROIs generally have higher cloud coverage.
 
-*Figure: Global distribution of 10,223 coastal ROIs (green) and excluded inland ROIs (red) from the AllClear dataset. Blue lines represent global coastlines from Natural Earth shapefiles.*
+
 
 ## Setup & Installation
 
@@ -41,11 +46,11 @@ The map below shows the global distribution of coastal ROIs (green) within 300km
 Create a new Python environment and install dependencies:
 
 ```bash
-# Create virtual environment (recommended)
+# Create virtual environment 
 conda create -n coastline_dataset python=3.9
 conda activate coastline_dataset
 
-# Or using venv
+# Or using venv (recommended)
 python -m venv coastline_env
 source coastline_env/bin/activate  # On Windows: coastline_env\Scripts\activate
 
@@ -146,110 +151,34 @@ CoastalRemoteSensingImagery/
     └── ... (10,223 TIF files total)
 ```
 
-### Step 4: Verify Data Integrity
-
-Before proceeding, verify that all data has been downloaded correctly:
+### Step 4: Changing Root Directory
+Change the input and target image root directory within the dataloader.py
 
 ```bash
-python verify_dataloader.py --data_root /path/to/your/allclear/data_root
+dataset_json = CoastlineCloudRemovalDataset(
+        csv_path=os.path.join(script_dir, 'data.csv'),                      
+        data_root='/allclear/data/root',     # UPDATE: Path to AllClear data
+        target_dir='/coastline/target/root', # UPDATE: Path to target data
+        split_json_path=os.path.join(script_dir, 'train_test_split.json'), 
+        split='train',
+        n_input_samples=6,
+        sampler='random',
+        return_masks=True,
+        return_paths=True,
+        random_seed=42
+    )
 ```
 
-You can also customize the verification:
-```bash
-python verify_dataloader.py \
-    --data_root /path/to/your/allclear/data_root \
-    --target_dir coastline_target \
-    --csv_path data/data.csv \
-    --split_json_path data/train_test_split.json \
-    --n_samples 20
-```
-
-This verification script will:
-- ✓ Test dataset creation for all splits (train/val/test)
-- ✓ Load sample data and check for errors
-- ✓ Verify shape consistency across inputs/targets/masks
-- ✓ Check value ranges and data quality (NaN, Inf, negatives)
-- ✓ Validate mask alignment with inputs
-- ✓ Check ROI consistency between inputs and targets
-- ✓ Test all sampling modes (all, fixed, random)
-- ✓ Verify geospatial coordinate consistency
-
-**Expected output:**
-```
-🎉 ALL TESTS PASSED! Dataset is ready for training.
-```
-
-If any tests fail, the script will provide detailed error messages indicating what needs to be fixed.
-
-### Step 5: Quick Test
+### Step 4: Quick Test
 
 Run a quick test to ensure the dataloader works:
 
 ```bash
-python test_dataloader.py --data_root /path/to/your/allclear/data_root
+python dataloader.py 
 ```
 
-This will load 3 samples and display their information to confirm everything is working correctly.
+This will load 10 samples and displaying the roi input and target image path. The amount of inputs is based on the number you set under "n_input_samples"
 
 ---
-
-## 📊 Dataset Usage
-
-### Basic Usage
-
-```python
-from data.dataloader import CoastlineCloudRemovalDataset
-
-dataset = CoastlineCloudRemovalDataset(
-    csv_path='data/data.csv',                        # Included in repo (no change needed)
-    data_root='/path/to/your/allclear/data_root',   # UPDATE THIS: Path to AllClear data
-    target_dir='coastline_target',                   # Included in repo (no change needed)
-    split_json_path='data/train_test_split.json',   # Included in repo (no change needed)
-    split='train'
-)
-```
-
-**Only one path needs to be changed:**
-- `data_root`: Path to where you downloaded the AllClear dataset in Step 2
-
-All other files use relative paths and are included in the repository.
-
-### Advanced Configuration
-
-You can customize various dataset parameters:
-
-```python
-dataset = CoastlineCloudRemovalDataset(
-    csv_path='data/data.csv',
-    data_root='/path/to/your/allclear/data_root',
-    target_dir='coastline_target',
-    split_json_path='data/train_test_split.json',
-    split='train',                    # 'train', 'val', 'test', or 'all'
-    n_input_samples=6,                # Number of temporal inputs to use
-    sampler='random',                 # 'random', 'fixed', or 'all'
-    return_masks=True,                # Include cloud probability masks
-    return_paths=True,                # Include file paths in output
-    random_seed=42                    # Seed for reproducibility
-)
-```
-
-For integration with PyTorch training loops, wrap the dataset in a DataLoader:
-
-```python
-from torch.utils.data import DataLoader
-
-dataloader = DataLoader(
-    dataset, 
-    batch_size=8, 
-    shuffle=True, 
-    num_workers=4
-)
-
-for batch in dataloader:
-    inputs = batch['input']['S2']      # [B, T, C, H, W]
-    targets = batch['target']['S2']    # [B, C, H, W]
-    masks = batch['input']['masks']    # [B, T, H, W]
-    # Your training code here...
-```
 
 **Last Updated**: February 9, 2026
