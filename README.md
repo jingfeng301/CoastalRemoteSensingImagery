@@ -181,4 +181,22 @@ This will load 10 samples and displaying the roi input and target image path. Th
 
 ---
 
+Expected Output:
+```bash
+ROI: roi2370
+Input shape: (6, 13, 256, 256) (T=6, C=13, H=256, W=256)
+Target shape: (13, 256, 256) (C=13, H=256, W=256)
+
+Input images (6 files):
+  1. /mnt/sdb/jingfeng/data/roi2370/2022_8/s2_toa/roi2370_s2_toa_2022_8_4_median.tif
+  2. /mnt/sdb/jingfeng/data/roi2370/2022_10/s2_toa/roi2370_s2_toa_2022_10_6_median.tif
+  3. /mnt/sdb/jingfeng/data/roi2370/2022_1/s2_toa/roi2370_s2_toa_2022_1_1_median.tif
+  4. /mnt/sdb/jingfeng/data/roi2370/2022_12/s2_toa/roi2370_s2_toa_2022_12_7_median.tif
+  5. /mnt/sdb/jingfeng/data/roi2370/2022_6/s2_toa/roi2370_s2_toa_2022_6_10_median.tif
+  6. /mnt/sdb/jingfeng/data/roi2370/2022_3/s2_toa/roi2370_s2_toa_2022_3_22_median.tif
+
+Target image:
+  /home/wangyu/CoastalRemoteSensingImagery/coastline_target/roi2370_optimal_composite.tif
+```
+
 **Last Updated**: February 9, 2026
